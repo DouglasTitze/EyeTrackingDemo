@@ -14,6 +14,7 @@ public class ExampleEyeInteractable : BaseEyeInteractable
     [SerializeField] Material matUnselected;
 
     // Time (in seconds) that the user needs to be interacting with an object to register it as selected
+    // Can be switch to a static varibale so all objects which have this script automatically take the specified time to become select
     [SerializeField] float timeTillSelected = 1f;
 
     private Coroutine timer;
