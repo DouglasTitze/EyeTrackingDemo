@@ -19,6 +19,12 @@ public class ExampleEyeInteractable : BaseEyeInteractable
 
     private Coroutine timer;
     private bool selected = false;
+    private Material prevMaterial;
+
+    private void Start()
+    {
+        prevMaterial = matUnselected;    
+    }
 
     public override void isHit(RaycastHit hitInfo)
     {
@@ -72,6 +78,9 @@ public class ExampleEyeInteractable : BaseEyeInteractable
 
     private void changeMaterialTo(Material mat)
     {
+        if (prevMaterial == mat) { return; }
+
         GetComponent<Renderer>().material = mat;
+        prevMaterial = mat;
     }
 }
