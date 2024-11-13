@@ -2,29 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Simple interactable that logs when each method is executed
+/// </summary>
 public class BaseEyeInteractable : MonoBehaviour, RayInterface
 {
-    /// <summary>
-    /// This script is only executed on the initial hit of the object
-    /// <summary>
     public virtual void isHit(RaycastHit hitInfo)
     {
-        Debug.Log(hitInfo.collider.gameObject);
+        Debug.Log("The object '" + hitInfo.collider.gameObject + "' has been hit.");
     }
 
-    /// <summary>
-    /// If the object has been hit, then each contiguous hit executes this function
-    /// </summary>
     public virtual void isSelected(RaycastHit hitInfo)
     {
-        Debug.Log(hitInfo.collider.gameObject);
+        Debug.Log("The object '" + hitInfo.collider.gameObject + "' is being selected.");
     }
 
-    /// <summary>
-    /// Runs whenever the object is no longer being hit by a ray cast
-    /// </summary>
     public virtual void isUnselected()
     {
-        Debug.Log(gameObject);
+        Debug.Log("The object '" + gameObject + "' has stopped being selected.");
     }
 }

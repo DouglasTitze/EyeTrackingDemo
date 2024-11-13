@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Changes the material of the interactable depending on its interaction state
+/// </summary>
 public class ExampleEyeInteractable : BaseEyeInteractable
 {
     // Change to theses materials when mode is a specifc executed
@@ -9,8 +13,8 @@ public class ExampleEyeInteractable : BaseEyeInteractable
     [SerializeField] Material matSelected;
     [SerializeField] Material matUnselected;
 
-    // Length in seconds that the person needs to be looking at an object to register as selected
-    [SerializeField] float timeTillSelected = 2f;
+    // Time (in seconds) that the user needs to be interacting with an object to register it as selected
+    [SerializeField] float timeTillSelected = 1f;
 
     private Coroutine timer;
     private bool selected = false;
@@ -40,6 +44,7 @@ public class ExampleEyeInteractable : BaseEyeInteractable
 
     public override void isUnselected()
     {
+        // If there was an object about to be selected, then cancel the timer
         if (timer != null)
         {
             StopCoroutine(timer);
@@ -47,6 +52,7 @@ public class ExampleEyeInteractable : BaseEyeInteractable
         }
 
         selected = false;
+
         changeMaterialTo(matUnselected);
     }
 

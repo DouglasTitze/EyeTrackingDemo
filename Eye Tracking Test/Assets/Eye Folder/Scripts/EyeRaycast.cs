@@ -4,10 +4,15 @@ using UnityEngine;
 
 public class EyeRaycast : MonoBehaviour
 {
+    // Determines the color of the raycast
     [SerializeField] private Material rayMaterial;
+
+    // Determines if the raycast is visible to the user
     [SerializeField] private bool isRayVisible = true;
 
+    // Maximum distance in which the raycast will look for an object to hit
     static public float maxHitDist = 100f;
+
     private LineRenderer lineRenderer;
     private RayInterface prevTarget;
 
