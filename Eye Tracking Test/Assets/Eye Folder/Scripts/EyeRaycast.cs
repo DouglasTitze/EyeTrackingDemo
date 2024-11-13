@@ -10,6 +10,10 @@ public class EyeRaycast : MonoBehaviour
     // Determines if the raycast is visible to the user
     [SerializeField] private bool isRayVisible = true;
 
+    // When set to true, the lineRenderer will always be shown when the ray hits an object
+    // This also overrides the isRayVisible to true
+    [SerializeField] private bool debugRay = true;
+
     // Maximum distance in which the raycast will look for an object to hit
     static public float maxHitDist = 100f;
 
@@ -57,6 +61,12 @@ public class EyeRaycast : MonoBehaviour
 
                 enableRay(isRayVisible, hit);
 
+            }
+            
+            // Draws the line renderer even if the object is not a RayInterface
+            else if (debugRay == true)
+            {
+                enableRay(true, hit);
             }
 
             // If the target is null (occurs when the object is not interactable, but is hit)
