@@ -1,5 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EyeRaycast : MonoBehaviour
@@ -8,17 +8,19 @@ public class EyeRaycast : MonoBehaviour
     [SerializeField] private Material rayMaterial;
 
     // Determines if the raycast is visible to the user
-    [SerializeField] private bool isRayVisible = true;
+    [SerializeField] public bool isRayVisible = true;
 
-    // When set to true, the lineRenderer will always be shown when the ray hits an object
-    // This also overrides the isRayVisible to true
-    [SerializeField] private bool debugRay = true;
+    // When enabled the ray can interact with more than one interactable at once
+    // If disabled, then it can only interact with one interactable at a time
+    static private bool multiHitEnabled = true;
 
     // Maximum distance in which the raycast will look for an object to hit
     static public float maxHitDist = 100f;
 
     private LineRenderer lineRenderer;
-    private RayInterface prevTarget;
+
+    // Holds the last frames interactables (if mulitHit = False, then it only ever contains one element)
+    private HashSet<RayInterface> prevTargets = new HashSet<RayInterface>();
 
     private void Start()
     {
@@ -31,74 +33,29 @@ public class EyeRaycast : MonoBehaviour
 
     private void Update()
     {
-        RaycastHit hit;
-
-        // Check if the ray hits an object
-        if (Physics.Raycast(transform.position, transform.forward, out hit, maxHitDist))
+        if (multiHitEnabled)
         {
-            RayInterface target = hit.collider.GetComponent<RayInterface>();
+            RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, maxHitDist);
 
-            // If the target has a RayInterface continue
-            if (target != null)
-            {
-
-                if (target != prevTarget)
-                {
-                    // Unselect previous target
-                    if (prevTarget != null) { prevTarget.isUnselected(); }
-
-                    // Make prevTarget equal new target
-                    prevTarget = target;
-
-                    // isHit is controlled by the EyeInteract, but can be modified by overriding
-                    target.isHit(hit);
-                }
-
-                else
-                {
-                    prevTarget.isSelected(hit);
-                }
-
-                enableRay(isRayVisible, hit);
-
-            }
-            
-            // Draws the line renderer even if the object is not a RayInterface
-            else if (debugRay == true)
-            {
-                enableRay(true, hit);
-            }
-
-            // If the target is null (occurs when the object is not interactable, but is hit)
-            else
-            {
-                // Unselect previous target
-                if (prevTarget != null)
-                { 
-                    prevTarget.isUnselected(); 
-                    prevTarget = null;
-                }
-
-                lineRenderer.enabled = false;
-            }
+            processHits(hits);
         }
-
-        // If no object is hit at all
         else
         {
-            // Disable the LineRenderer if no hit is detected
-            lineRenderer.enabled = false;
+            RaycastHit hit;
+
+            Physics.Raycast(transform.position, transform.forward, out hit, maxHitDist);
+
+            processHit(hit);
         }
     }
 
     /// <summary>
-    /// Shows the ray from eyeball to target if input variable b == True
+    /// Shows the ray from the eyeball to the target if the user enabled this functionallity
     /// </summary>
-    /// <param name="b"> Boolean to determine if the ray is visible or not</param>
     /// <param name="hit"> Hit information to help display the Ray </param>
-    private void enableRay(bool b, RaycastHit hit)
+    private void enableRay(RaycastHit hit)
     {
-        if (b)
+        if (isRayVisible)
         {
             // Set the start and end points of the LineRenderer
             lineRenderer.SetPosition(0, transform.position);          // Start at the object's position
@@ -111,5 +68,92 @@ public class EyeRaycast : MonoBehaviour
         }
 
         else { return; }
+    }
+
+    /// <summary>
+    /// For each hit along the ray, process each hit and update prevTargets
+    /// </summary>
+    private void processHits(RaycastHit[] hits)
+    {
+        RaycastHit lastHit = default;
+        HashSet<RayInterface> targets = new HashSet<RayInterface>();
+        foreach (var hit in hits)
+        {
+            RayInterface target = hit.collider.GetComponent<RayInterface>();
+
+            // If the target has a RayInterface continue
+            if (target != null)
+            {
+                targets.Add(target);
+
+                // If target is not in prevTargets, then hit target
+                if (prevTargets.Contains(target) == false) { target.isHit(hit); }
+
+                // Otherwise, select it
+                else { target.isSelected(hit); }
+
+                lastHit = hit;
+            }
+        }
+
+        // If any object was hit then enable the ray
+        if (lastHit.collider != null) { enableRay(lastHit); }
+        else { lineRenderer.enabled = false; }
+
+        // Unselect all the targets that are no longer being selected and update set
+        updatePrevTargets(targets);
+    }
+
+    /// <summary>
+    /// Process the first interactable hit
+    /// </summary>
+    private void processHit(RaycastHit hit)
+    {
+        RayInterface target;
+        if (hit.collider != null)
+        {
+            target = hit.collider.GetComponent<RayInterface>();
+
+            // If the target has a RayInterface continue
+            if (target != null)
+            {
+                // If target is not the prevTarget, then hit target
+                if (prevTargets.Contains(target) == false)
+                {
+                    // Unselect previous target
+                    updatePrevTargets(new HashSet<RayInterface> { target });
+
+                    // Hit the target
+                    target.isHit(hit);
+                }
+
+                // Otherwise, select it
+                else { target.isSelected(hit); }
+
+                // Enable the ray
+                enableRay(hit);
+
+                // Exit the function early to avoid executing the unselect logic
+                return;
+            }
+        }
+
+        // This will only get hit if the hit was either null or not a RayInterface object
+        updatePrevTargets(new HashSet<RayInterface>());
+        lineRenderer.enabled = false;
+    }
+
+    /// <summary>
+    /// Removes all targets absent from the input set that were previously in prevTargets
+    /// Also, updates prevTargets to the input set
+    /// </summary>
+    private void updatePrevTargets(HashSet<RayInterface> targets)
+    {
+        foreach (var oldTarget in prevTargets.Except(targets))
+        {
+            oldTarget.isUnselected();
+        }
+
+        prevTargets = targets;
     }
 }
