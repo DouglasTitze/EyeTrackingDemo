@@ -120,6 +120,8 @@ _This script is tailored to the use case of the tutorial, but can be used as an 
 - isHit - Record the start time of the interaction
 - isSelected - If liveUpdate is enabled, then continuously update the dictionary to the new total elapsed time of the interaction
 - isUnselected - Update the dictionary to the new total elapsed time of the interaction
+- getTotalTimeStr - Collect all the data from the dictionary and return it as a formatted string ("total_seconds s total_remaining_milliseconds ms")
+- updateBodyText - Display the total time the canvas has been looked at and the total number of unique interactions the user has performed on the canvas.
 
 **Important Information**
 
