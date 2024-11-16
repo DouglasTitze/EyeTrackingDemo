@@ -26,8 +26,8 @@ public class EyeRaycast : MonoBehaviour
     {
         // Initialize the LineRenderer component
         lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.02f; // Set the starting width of the line
-        lineRenderer.endWidth = 0.02f;   // Set the ending width of the line
+        lineRenderer.startWidth = 0.01f; // Set the starting width of the line
+        lineRenderer.endWidth = 0.01f;   // Set the ending width of the line
         lineRenderer.material = rayMaterial;
     }
 
