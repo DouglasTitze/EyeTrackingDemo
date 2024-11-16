@@ -20,7 +20,7 @@ public class EyeRaycast : MonoBehaviour
     private LineRenderer lineRenderer;
 
     // Holds the last frames interactables (if mulitHit = False, then it only ever contains one element)
-    private HashSet<RayInterface> prevTargets = new HashSet<RayInterface>();
+    private HashSet<EyeRayInterface> prevTargets = new HashSet<EyeRayInterface>();
 
     private void Start()
     {
@@ -76,12 +76,12 @@ public class EyeRaycast : MonoBehaviour
     private void processHits(RaycastHit[] hits)
     {
         RaycastHit lastHit = default;
-        HashSet<RayInterface> targets = new HashSet<RayInterface>();
+        HashSet<EyeRayInterface> targets = new HashSet<EyeRayInterface>();
         foreach (var hit in hits)
         {
-            RayInterface target = hit.collider.GetComponent<RayInterface>();
+            EyeRayInterface target = hit.collider.GetComponent<EyeRayInterface>();
 
-            // If the target has a RayInterface continue
+            // If the target has a EyeRayInterface continue
             if (target != null)
             {
                 targets.Add(target);
@@ -109,19 +109,19 @@ public class EyeRaycast : MonoBehaviour
     /// </summary>
     private void processHit(RaycastHit hit)
     {
-        RayInterface target;
+        EyeRayInterface target;
         if (hit.collider != null)
         {
-            target = hit.collider.GetComponent<RayInterface>();
+            target = hit.collider.GetComponent<EyeRayInterface>();
 
-            // If the target has a RayInterface continue
+            // If the target has a EyeRayInterface continue
             if (target != null)
             {
                 // If target is not the prevTarget, then hit target
                 if (prevTargets.Contains(target) == false)
                 {
                     // Unselect previous target
-                    updatePrevTargets(new HashSet<RayInterface> { target });
+                    updatePrevTargets(new HashSet<EyeRayInterface> { target });
 
                     // Hit the target
                     target.isHit(hit);
@@ -138,8 +138,8 @@ public class EyeRaycast : MonoBehaviour
             }
         }
 
-        // This will only get hit if the hit was either null or not a RayInterface object
-        updatePrevTargets(new HashSet<RayInterface>());
+        // This will only get hit if the hit was either null or not a EyeRayInterface object
+        updatePrevTargets(new HashSet<EyeRayInterface>());
         lineRenderer.enabled = false;
     }
 
@@ -147,7 +147,7 @@ public class EyeRaycast : MonoBehaviour
     /// Removes all targets absent from the input set that were previously in prevTargets
     /// Also, updates prevTargets to the input set
     /// </summary>
-    private void updatePrevTargets(HashSet<RayInterface> targets)
+    private void updatePrevTargets(HashSet<EyeRayInterface> targets)
     {
         foreach (var oldTarget in prevTargets.Except(targets))
         {

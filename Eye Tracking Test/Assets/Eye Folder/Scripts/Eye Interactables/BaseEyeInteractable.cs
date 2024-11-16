@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Simple interactable that logs when each method is executed
 /// </summary>
-public class BaseEyeInteractable : MonoBehaviour, RayInterface
+public class BaseEyeInteractable : MonoBehaviour, EyeRayInterface
 {
     public virtual void isHit(RaycastHit hitInfo)
     {

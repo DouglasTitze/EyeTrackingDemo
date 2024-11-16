@@ -405,7 +405,7 @@ GameObject:
   - component: {fileID: 123724911}
   - component: {fileID: 123724916}
   - component: {fileID: 123724917}
-  - component: {fileID: 123724919}
+  - component: {fileID: 123724921}
   - component: {fileID: 123724920}
   m_Layer: 5
   m_Name: InstructionCanvas
@@ -498,7 +498,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 4.010892, y: 0.10639644}
+  m_AnchoredPosition: {x: 4.010892, y: 0.379}
   m_SizeDelta: {x: 2961.963, y: 1744.7693}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &123724916
@@ -538,18 +538,6 @@ MonoBehaviour:
   _selectSurface: {fileID: 0}
   _movementProvider: {fileID: 0}
   _tiebreakerScore: 0
---- !u!114 &123724919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 123724910}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1870b7b17ddb8a45bf0d789f14c15c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &123724920
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -571,6 +559,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2973.1133, y: 1733.8478, z: 60.810326}
   m_Center: {x: 0.19949673, y: -6.686687, z: -30.905127}
+--- !u!114 &123724921
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 123724910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5ed71acaf1b6804eb3006ce72999532, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bodyText: {fileID: 64581419}
+  liveUpdateEnabled: 1
+  isSectionEnabled: 0
 --- !u!1 &155393805
 GameObject:
   m_ObjectHideFlags: 0
@@ -3163,8 +3166,8 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1477114785}
-  m_LocalRotation: {x: 0, y: 0.7071068, z: -0, w: -0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0.31114691}
+  m_LocalRotation: {x: -0, y: 0.3813365, z: -0, w: -0.92443633}
+  m_LocalPosition: {x: 0, y: 0, z: 2.816}
   m_LocalScale: {x: 0.001, y: 0.001, z: 0.001}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -3172,10 +3175,10 @@ RectTransform:
   - {fileID: 1539416134}
   - {fileID: 544940035}
   m_Father: {fileID: 342624726}
-  m_LocalEulerAnglesHint: {x: 0, y: 270, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 315.167, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.64489174, y: 0.16589642}
+  m_AnchoredPosition: {x: 1.557, y: 0.16589642}
   m_SizeDelta: {x: 1572, y: 926}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1539416130
@@ -4926,6 +4929,7 @@ MonoBehaviour:
   btn_back: {fileID: 1780431707}
   btn_next: {fileID: 975194237}
   cubes: {fileID: 871783196}
+  eyeInteractableScript: {fileID: 123724921}
   TextSections:
   - Header: Welcome to the Eye Tracking Demo
     Text: 'This demo will showcase a variety of possibilites using the eye tracking
@@ -4953,6 +4957,9 @@ MonoBehaviour:
       to the next section to see an example of this.'
   - Header: Interaction Time Delays
     Text: "0 Seconds\t\t0.5 Seconds\t\t1 Second\n\n\n\n\n\n\n\n\nPress next to continue"
+  - Header: Interaction Time With Canvas
+    Text: "This is the data collected given how often and how long you have looked
+      at the canvas\n\nTotal Unique Interactions: \n\nTotal Interaction Time: "
   curSection: 0
 --- !u!1 &2136467606
 GameObject:
@@ -5880,6 +5887,6 @@ SceneRoots:
   m_Roots:
   - {fileID: 1876496143}
   - {fileID: 646484713}
+  - {fileID: 342624726}
   - {fileID: 1825546084}
   - {fileID: 755048647}
-  - {fileID: 342624726}

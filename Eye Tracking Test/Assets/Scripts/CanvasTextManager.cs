@@ -19,6 +19,7 @@ public class CanvasTextManager : MonoBehaviour
     [SerializeField] private Button btn_back;
     [SerializeField] private Button btn_next;
     [SerializeField] private GameObject cubes;
+    [SerializeField] private CanvasEyeInteractable eyeInteractableScript;
     [Space]
     [SerializeField] private List<Sections> TextSections = new List<Sections>();
     
@@ -45,6 +46,8 @@ public class CanvasTextManager : MonoBehaviour
             // Check if the cubes section is being displayed
             toggleCubes();
 
+            // Check if the canvas section is being displayed
+            toggleCanvasTimerSection();
         }
     }
 
@@ -77,5 +80,12 @@ public class CanvasTextManager : MonoBehaviour
         {
             cubes.SetActive(false);
         }
+    }
+
+    private void toggleCanvasTimerSection()
+    {
+        if (curSection == 3) { eyeInteractableScript.isSectionEnabled = true; }
+        else { eyeInteractableScript.isSectionEnabled = false; }
+        
     }
 }

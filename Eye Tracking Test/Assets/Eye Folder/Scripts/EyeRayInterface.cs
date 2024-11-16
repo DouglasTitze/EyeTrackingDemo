@@ -5,7 +5,7 @@ using UnityEngine;
 /// 
 /// !!!!The logic which determines when these methods are executed is in 'EyeRaycast'!!!!
 /// </summary>
-public interface RayInterface
+public interface EyeRayInterface
 {
     /// <summary>
     /// Executes on the initial hit of the object
