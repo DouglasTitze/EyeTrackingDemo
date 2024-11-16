@@ -21,21 +21,26 @@ _All scripts are well documented, and this is supplemental to their comments_
 
 - rayMaterial - Determines the color of the raycast
 - isRayVisible - Determines if the raycast is visible to the user, if the ray hits an interactable object
-- debugRay - Makes ray visible if it hits **_ANY_** object (overrides isRayVisible)
+- multiHitEnabled - Allows the ray to hit multiple interactables at once
 - maxHitDist - Maximum distance in which the raycast will look for an object to hit
 
 **Methods**
 
 - Start - Initializes the lineRenderer
 - Update - Shoots ray casts each frame from each object which has this script
-  - The raycast may hit an object, but if it does not have a script with type "**_RayInterface_**" then it will ignore the hit
+  - The raycast may hit an object, but if it does not have a script with type "**_EyeRayInterface.cs_**" then it will ignore the hit
 - enableRay - Renders the ray from the eyeball to the target if the input is True
-  - Important Information
-    - This script is ONLY intended for the eye objects
+- processHits - Updates the state of **_ALL_** objects hit by a ray, and unselects the objects no longer being interacted with
+- processHit - Updates the state of the single object hit by a ray, and unselects the object no longer being interacted with
+- updatePrevTargets - Unselects the object(s) no longer in the target set, and updates prevTargets to the new input set
+
+**Important Information**
+
+- This script is ONLY intended for the eye objects
 
 ---
 
-### RayInterface - Empty interface that allows for eye raycast interactions
+### EyeRayInterface - Empty interface that allows for eye raycast interactions
 
 **Methods**
 
@@ -45,7 +50,7 @@ _All scripts are well documented, and this is supplemental to their comments_
 
 **Important Information**
 
-- The logic which implements when these methods are executed is in EyeRaycast
+- The logic which executes each section above is implemented by "**_EyeRaycast.cs_**"
 
 ---
 
@@ -59,7 +64,7 @@ _All scripts are well documented, and this is supplemental to their comments_
 
 **Important Information**
 
-- This script inherits from **_RayInterface_**, so if an object has this script and is hit, then it will be recognized as a valid hit
+- This script inherits from **_EyeRayInterface_**, so if an object has this script and is hit, then it will be recognized as a valid hit
 
 ---
 
@@ -74,12 +79,50 @@ _All scripts are well documented, and this is supplemental to their comments_
 
 **Methods**
 
-- isHit - Changes the objects material to \***\*matHit\*\***
-- isSelected - Changes the objects material to \***\*matSelected\*\*** after the desired \***\*timeTillSelected\*\***
-- isUnselected - Changes the objects material to \***\*matUnselected\*\***
+- isHit - Changes the objects material to matHit
+- isSelected - Changes the objects material to matSelected after the desired timeTillSelected
+- isUnselected - Changes the objects material to matUnselected
 - executeSelect - Given the input time, delay the object from being selected for that much time
 - changeMaterialTo - Change the object material to the input material
 
 **Important Information**
 
 - This script inherits from **_BaseEyeInteractable_**, so if an object has this script and is hit, then it will be recognized as a valid hit
+
+---
+
+### BaseEyeInteractable - Base interactable that implements simple interactions given raycast hit info
+
+**Methods**
+
+- isHit - Logs to the console that the object has been hit by a raycast
+- isSelected - Logs to the console that the object is still being hit by a raycast
+- isUnselected - Logs to the console that the object has stopped being hit by a raycast
+
+**Important Information**
+
+- This script inherits from **_EyeRayInterface_**, so if an object has this script and is hit, then it will be recognized as a valid hit
+
+---
+
+### CanvasEyeInteractable - Records data on how long and how many times the user looks at the canvas
+
+_This script is tailored to the use case of the tutorial, but can be used as an example of how to interact with canvas's_
+
+**Variables**
+
+- liveUpdateEnabled - When enabled the tutorial continuously updates the times and total time looked at the canvas
+- isSectionEnabled - When enabled, the section is currently on the correct section to begin displaying text
+- allInteractions - A dictionary to contain all the unique eye interactions, and their respective durations
+
+**Methods**
+
+- isHit - Record the start time of the interaction
+- isSelected - If liveUpdate is enabled, then continuously update the dictionary to the new total elapsed time of the interaction
+- isUnselected - Update the dictionary to the new total elapsed time of the interaction
+
+**Important Information**
+
+- The canvas MUST have a box collider which covers its entire panel to work
+- isSectionEnabled is triggered by the **_CanvasTextManger_** script, but it could be extrapolated to do it independetally by scanning the canvas's text box until the desired text is inside of the canvas
+- The displayed amount of unique interactions is _usually_ double of the actual number, since both eyes are usually interacting with the canvas. Despite this the recorded time is still acurate.
