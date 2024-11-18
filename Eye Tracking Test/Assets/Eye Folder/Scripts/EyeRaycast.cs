@@ -23,19 +23,22 @@ public class EyeRaycast : MonoBehaviour
 
     private void Update()
     {
+        RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, maxHitDist);
+
+        // Do NOT continue, if invalid hit list
+        if (validHitList(hits) == false) { return; }
+
         if (multiHitEnabled)
         {
-            RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, maxHitDist);
-
             processHits(hits);
         }
         else
         {
-            RaycastHit hit;
+            // Get the closest hit
+            RaycastHit closestHit = getClosestHit(hits);
 
-            Physics.Raycast(transform.position, transform.forward, out hit, maxHitDist);
-
-            processHit(hit);
+            // Only input the closestHit into the processHits function
+            processHits(new RaycastHit[] { closestHit });
         }
     }
 
@@ -44,24 +47,24 @@ public class EyeRaycast : MonoBehaviour
     /// </summary>
     private void processHits(RaycastHit[] hits)
     {
-        // If none of the hits are valid, then exit the function
-        if (validHitList(hits) == false) { return; }
-
         RaycastHit lastHit = default;
         HashSet<EyeRayInterface> targetsSet = new HashSet<EyeRayInterface>();
         foreach (var hit in hits)
         {
-            // Get all interactable scripts from the hit object
+            // Process all targets associated with the hit
             EyeRayInterface[] targets = hit.collider.GetComponents<EyeRayInterface>();
 
-            // Process all the targets, and store the valid targets in the temp set
-            HashSet<EyeRayInterface> tempSet = processTargets(targets, hit); 
+            foreach (EyeRayInterface target in targets)
+            {
+                // Execute select or hit on the input target
+                executeTargetEvent(target, hit);
+            }
+
+            // Update the set with the new targets
+            targetsSet.UnionWith(targets);
 
             // Update lastHit and the targetsSet
-            if (tempSet.Count != 0) { lastHit = hit; }
-
-            targetsSet.UnionWith(tempSet);
-            
+            if (targets.Length != 0) { lastHit = hit; }
         }
 
         // If any object was hit then enable the ray
@@ -70,25 +73,6 @@ public class EyeRaycast : MonoBehaviour
 
         // Unselect all the targets that are no longer being selected and update set
         updatePrevTargets(targetsSet);
-    }
-
-    /// <summary>
-    /// Process the first interactable hit
-    /// </summary>
-    private void processHit(RaycastHit hit)
-    {
-        // Exit the function if the hit is not valid
-        if (validHitList(new RaycastHit[] { hit }) == false) { return; }
-
-
-        EyeRayInterface target = hit.collider.GetComponent<EyeRayInterface>();
-        // If an event was triggered, then the target was valid
-        if (executeTargetEvent(target, hit)) 
-        {
-            // Update prevTargets, enableRay, and exit the function
-            updatePrevTargets(new HashSet<EyeRayInterface> { target });
-            enableRay(hit);
-        }
     }
 
     /// <summary>
@@ -108,70 +92,62 @@ public class EyeRaycast : MonoBehaviour
     /// <summary>
     /// Execute Hit or Selected on the input target
     /// </summary>
-    /// <returns>
-    /// Return True if the input was valid and an event was triggered
-    /// </returns>
-    private bool executeTargetEvent(EyeRayInterface target, RaycastHit hit)
+    private void executeTargetEvent(EyeRayInterface target, RaycastHit hit)
     {
-        // A target passed in may not always be a valid target
-        if (target == null) { return false; }
+        // If target is in the prevTarget, then select target
+        if (prevTargetsSet.Contains(target)) { target.isSelected(hit); }
 
-        // If target is not the prevTarget, then hit target
-        if (prevTargetsSet.Contains(target) == false)
-        {
-            // Hit the target
-            target.isHit(hit);
-        }
-
-        // Otherwise, select it
-        else 
-        { 
-            target.isSelected(hit); 
-        }
-
-        return true;
+        // Otherwise, hit it
+        else { target.isHit(hit); }
     }
 
-    /// <summary>
-    /// Processes all the input targets and executes their events
-    /// </summary>
-    /// <returns>
-    /// Returns a set of all the valid targets that were executed
-    /// </returns>
-    private HashSet<EyeRayInterface> processTargets(EyeRayInterface[] targets, RaycastHit hit)
-    {
-        HashSet<EyeRayInterface> validTargets = new HashSet<EyeRayInterface>();
-
-        // Otherwise execute all target events
-        foreach (EyeRayInterface target in targets)
-        {
-            // If it was a valid target, add it to the set
-            if(executeTargetEvent(target, hit)) { validTargets.Add(target); }
-        }
-
-        return validTargets;
-    }
+    /********************** Utility Section **********************/
 
     /// <summary>
-    /// Validates the input hitlist as valid or invlaid
+    /// Checks if the input list is empty.
+    /// If invlaid, then updates prevtargets and linerender
     /// </summary>
     /// <returns>
     /// Returns true if the list is valid
     /// </returns>
     private bool validHitList(RaycastHit[] hits)
     {
-        // If htis is empty or if the first hit collider is null, then INVALID
-        if (hits.Length == 0 || hits[0].collider == null)
+        // If hits is empty, then INVALID
+        if (hits.Length == 0)
         {
             updatePrevTargets(new HashSet<EyeRayInterface>());
             lineRenderer.enabled = false;
             return false;
         }
-        else { return true; }
+        else 
+        { 
+            return true; 
+        }
     }
 
+    /// <summary>
+    /// Iterates through the list and returns the hit with the smallest distance
+    /// This will NOT work on an empty list.
+    /// </summary>
+    /// <returns>
+    /// Returns the closest hit relative to the eyes to the object
+    /// </returns>
+    private RaycastHit getClosestHit(RaycastHit[] hits)
+    {
+        RaycastHit closestHit = hits[0];
 
-    /********************** RAY SECTION **********************/
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.distance < closestHit.distance) 
+            { 
+                closestHit = hit; 
+            }
+        }
+
+        return closestHit;
+    }
+
+    /********************** Ray Section **********************/
 
     /// <summary>
     /// Shows the ray from the eyeball to the target if the user enabled this functionallity
