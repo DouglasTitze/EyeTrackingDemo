@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// Changes the material of the interactable depending on its interaction state
 /// </summary>
-public class ExampleEyeInteractable : BaseEyeInteractable
+public class ChangeColorEyeInteractable : MonoBehaviour, EyeRayInterface
 {
     // Change to theses materials when mode is a specifc executed
     [SerializeField] Material matHit;
@@ -26,12 +26,12 @@ public class ExampleEyeInteractable : BaseEyeInteractable
         prevMaterial = matUnselected;    
     }
 
-    public override void isHit(RaycastHit hitInfo)
+    public void isHit(RaycastHit hitInfo)
     {
         changeMaterialTo(matHit);
     }
 
-    public override void isSelected(RaycastHit hitInfo)
+    public void isSelected(RaycastHit hitInfo)
     {
         // If the object is not selected, then check / begin the coroutine
         if (selected == false)
@@ -49,7 +49,7 @@ public class ExampleEyeInteractable : BaseEyeInteractable
         }
     }
 
-    public override void isUnselected()
+    public void isUnselected()
     {
         // If there was an object about to be selected, then cancel the timer
         if (timer != null)

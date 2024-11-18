@@ -7,17 +7,17 @@ public class EyeRaycast : MonoBehaviour
     // Determines if the raycast is visible to the user
     [SerializeField] public bool isRayVisible = true;
 
-    // When enabled the ray can interact with more than one interactable at once
-    // If disabled, then it can only interact with one interactable at a time
+    // When enabled the ray can interact with more than one object at once
+    // If disabled, then it can only interact with one obejct (if that one object has multiple interactables, that will still work)
     static private bool multiHitEnabled = true;
 
     // Maximum distance in which the raycast will look for an object to hit
     static public float maxHitDist = 100f;
 
-    private LineRenderer lineRenderer;
-
-    // Holds the last frames interactables (if mulitHit = False, then it only ever contains one element)
+    // Holds the last frames interactables
     private HashSet<EyeRayInterface> prevTargetsSet = new HashSet<EyeRayInterface>();
+
+    private LineRenderer lineRenderer;
 
     private void Start() { initializeLineRenderer(); }
 
@@ -26,6 +26,7 @@ public class EyeRaycast : MonoBehaviour
         RaycastHit[] hits = Physics.RaycastAll(transform.position, transform.forward, maxHitDist);
 
         // Do NOT continue, if invalid hit list
+        // If it is invalid it will also update the prevTargetsSet
         if (validHitList(hits) == false) { return; }
 
         if (multiHitEnabled)
@@ -43,17 +44,19 @@ public class EyeRaycast : MonoBehaviour
     }
 
     /// <summary>
-    /// For each hit along the ray, process each hit and update prevTargets
+    /// For each input hit, process each hit and update prevTargets
     /// </summary>
     private void processHits(RaycastHit[] hits)
     {
-        RaycastHit lastHit = default;
+        // Set that will contain all the new targets
         HashSet<EyeRayInterface> targetsSet = new HashSet<EyeRayInterface>();
+
+
+        RaycastHit lastHit = default;
         foreach (var hit in hits)
         {
             // Process all targets associated with the hit
             EyeRayInterface[] targets = hit.collider.GetComponents<EyeRayInterface>();
-
             foreach (EyeRayInterface target in targets)
             {
                 // Execute select or hit on the input target
@@ -63,7 +66,7 @@ public class EyeRaycast : MonoBehaviour
             // Update the set with the new targets
             targetsSet.UnionWith(targets);
 
-            // Update lastHit and the targetsSet
+            // Update lastHit
             if (targets.Length != 0) { lastHit = hit; }
         }
 
@@ -76,7 +79,7 @@ public class EyeRaycast : MonoBehaviour
     }
 
     /// <summary>
-    /// Removes all targets absent from the input set that were previously in prevTargets
+    /// Unselects all targets absent from the input set that were previously in prevTargets
     /// Also, updates prevTargets to the input set
     /// </summary>
     private void updatePrevTargets(HashSet<EyeRayInterface> targets)
@@ -105,7 +108,7 @@ public class EyeRaycast : MonoBehaviour
 
     /// <summary>
     /// Checks if the input list is empty.
-    /// If invlaid, then updates prevtargets and linerender
+    /// If empty, then updates prevtargets and linerender
     /// </summary>
     /// <returns>
     /// Returns true if the list is valid
@@ -130,7 +133,7 @@ public class EyeRaycast : MonoBehaviour
     /// This will NOT work on an empty list.
     /// </summary>
     /// <returns>
-    /// Returns the closest hit relative to the eyes to the object
+    /// Returns the closest hit to the eyes
     /// </returns>
     private RaycastHit getClosestHit(RaycastHit[] hits)
     {
