@@ -4,9 +4,6 @@ using UnityEngine;
 
 public class EyeRaycast : MonoBehaviour
 {
-    // Determines the color of the raycast
-    [SerializeField] private Material rayMaterial;
-
     // Determines if the raycast is visible to the user
     [SerializeField] public bool isRayVisible = true;
 
@@ -20,16 +17,9 @@ public class EyeRaycast : MonoBehaviour
     private LineRenderer lineRenderer;
 
     // Holds the last frames interactables (if mulitHit = False, then it only ever contains one element)
-    private HashSet<EyeRayInterface> prevTargets = new HashSet<EyeRayInterface>();
+    private HashSet<EyeRayInterface> prevTargetsSet = new HashSet<EyeRayInterface>();
 
-    private void Start()
-    {
-        // Initialize the LineRenderer component
-        lineRenderer = gameObject.AddComponent<LineRenderer>();
-        lineRenderer.startWidth = 0.01f; // Set the starting width of the line
-        lineRenderer.endWidth = 0.01f;   // Set the ending width of the line
-        lineRenderer.material = rayMaterial;
-    }
+    private void Start() { initializeLineRenderer(); }
 
     private void Update()
     {
@@ -48,6 +38,140 @@ public class EyeRaycast : MonoBehaviour
             processHit(hit);
         }
     }
+
+    /// <summary>
+    /// For each hit along the ray, process each hit and update prevTargets
+    /// </summary>
+    private void processHits(RaycastHit[] hits)
+    {
+        // If none of the hits are valid, then exit the function
+        if (validHitList(hits) == false) { return; }
+
+        RaycastHit lastHit = default;
+        HashSet<EyeRayInterface> targetsSet = new HashSet<EyeRayInterface>();
+        foreach (var hit in hits)
+        {
+            // Get all interactable scripts from the hit object
+            EyeRayInterface[] targets = hit.collider.GetComponents<EyeRayInterface>();
+
+            // Process all the targets, and store the valid targets in the temp set
+            HashSet<EyeRayInterface> tempSet = processTargets(targets, hit); 
+
+            // Update lastHit and the targetsSet
+            if (tempSet.Count != 0) { lastHit = hit; }
+
+            targetsSet.UnionWith(tempSet);
+            
+        }
+
+        // If any object was hit then enable the ray
+        if (lastHit.collider != null) { enableRay(lastHit); }
+        else { lineRenderer.enabled = false; }
+
+        // Unselect all the targets that are no longer being selected and update set
+        updatePrevTargets(targetsSet);
+    }
+
+    /// <summary>
+    /// Process the first interactable hit
+    /// </summary>
+    private void processHit(RaycastHit hit)
+    {
+        // Exit the function if the hit is not valid
+        if (validHitList(new RaycastHit[] { hit }) == false) { return; }
+
+
+        EyeRayInterface target = hit.collider.GetComponent<EyeRayInterface>();
+        // If an event was triggered, then the target was valid
+        if (executeTargetEvent(target, hit)) 
+        {
+            // Update prevTargets, enableRay, and exit the function
+            updatePrevTargets(new HashSet<EyeRayInterface> { target });
+            enableRay(hit);
+        }
+    }
+
+    /// <summary>
+    /// Removes all targets absent from the input set that were previously in prevTargets
+    /// Also, updates prevTargets to the input set
+    /// </summary>
+    private void updatePrevTargets(HashSet<EyeRayInterface> targets)
+    {
+        foreach (var oldTarget in prevTargetsSet.Except(targets))
+        {
+            oldTarget.isUnselected();
+        }
+
+        prevTargetsSet = targets;
+    }
+
+    /// <summary>
+    /// Execute Hit or Selected on the input target
+    /// </summary>
+    /// <returns>
+    /// Return True if the input was valid and an event was triggered
+    /// </returns>
+    private bool executeTargetEvent(EyeRayInterface target, RaycastHit hit)
+    {
+        // A target passed in may not always be a valid target
+        if (target == null) { return false; }
+
+        // If target is not the prevTarget, then hit target
+        if (prevTargetsSet.Contains(target) == false)
+        {
+            // Hit the target
+            target.isHit(hit);
+        }
+
+        // Otherwise, select it
+        else 
+        { 
+            target.isSelected(hit); 
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Processes all the input targets and executes their events
+    /// </summary>
+    /// <returns>
+    /// Returns a set of all the valid targets that were executed
+    /// </returns>
+    private HashSet<EyeRayInterface> processTargets(EyeRayInterface[] targets, RaycastHit hit)
+    {
+        HashSet<EyeRayInterface> validTargets = new HashSet<EyeRayInterface>();
+
+        // Otherwise execute all target events
+        foreach (EyeRayInterface target in targets)
+        {
+            // If it was a valid target, add it to the set
+            if(executeTargetEvent(target, hit)) { validTargets.Add(target); }
+        }
+
+        return validTargets;
+    }
+
+    /// <summary>
+    /// Validates the input hitlist as valid or invlaid
+    /// </summary>
+    /// <returns>
+    /// Returns true if the list is valid
+    /// </returns>
+    private bool validHitList(RaycastHit[] hits)
+    {
+        // If htis is empty or if the first hit collider is null, then INVALID
+        if (hits.Length == 0 || hits[0].collider == null)
+        {
+            updatePrevTargets(new HashSet<EyeRayInterface>());
+            lineRenderer.enabled = false;
+            return false;
+        }
+        else { return true; }
+    }
+
+
+    /********************** RAY SECTION **********************/
 
     /// <summary>
     /// Shows the ray from the eyeball to the target if the user enabled this functionallity
@@ -71,89 +195,13 @@ public class EyeRaycast : MonoBehaviour
     }
 
     /// <summary>
-    /// For each hit along the ray, process each hit and update prevTargets
+    /// Initializes line renderer that represents the raycast
     /// </summary>
-    private void processHits(RaycastHit[] hits)
+    private void initializeLineRenderer()
     {
-        RaycastHit lastHit = default;
-        HashSet<EyeRayInterface> targets = new HashSet<EyeRayInterface>();
-        foreach (var hit in hits)
-        {
-            EyeRayInterface target = hit.collider.GetComponent<EyeRayInterface>();
-
-            // If the target has a EyeRayInterface continue
-            if (target != null)
-            {
-                targets.Add(target);
-
-                // If target is not in prevTargets, then hit target
-                if (prevTargets.Contains(target) == false) { target.isHit(hit); }
-
-                // Otherwise, select it
-                else { target.isSelected(hit); }
-
-                lastHit = hit;
-            }
-        }
-
-        // If any object was hit then enable the ray
-        if (lastHit.collider != null) { enableRay(lastHit); }
-        else { lineRenderer.enabled = false; }
-
-        // Unselect all the targets that are no longer being selected and update set
-        updatePrevTargets(targets);
-    }
-
-    /// <summary>
-    /// Process the first interactable hit
-    /// </summary>
-    private void processHit(RaycastHit hit)
-    {
-        EyeRayInterface target;
-        if (hit.collider != null)
-        {
-            target = hit.collider.GetComponent<EyeRayInterface>();
-
-            // If the target has a EyeRayInterface continue
-            if (target != null)
-            {
-                // If target is not the prevTarget, then hit target
-                if (prevTargets.Contains(target) == false)
-                {
-                    // Unselect previous target
-                    updatePrevTargets(new HashSet<EyeRayInterface> { target });
-
-                    // Hit the target
-                    target.isHit(hit);
-                }
-
-                // Otherwise, select it
-                else { target.isSelected(hit); }
-
-                // Enable the ray
-                enableRay(hit);
-
-                // Exit the function early to avoid executing the unselect logic
-                return;
-            }
-        }
-
-        // This will only get hit if the hit was either null or not a EyeRayInterface object
-        updatePrevTargets(new HashSet<EyeRayInterface>());
-        lineRenderer.enabled = false;
-    }
-
-    /// <summary>
-    /// Removes all targets absent from the input set that were previously in prevTargets
-    /// Also, updates prevTargets to the input set
-    /// </summary>
-    private void updatePrevTargets(HashSet<EyeRayInterface> targets)
-    {
-        foreach (var oldTarget in prevTargets.Except(targets))
-        {
-            oldTarget.isUnselected();
-        }
-
-        prevTargets = targets;
+        // Initialize the LineRenderer component
+        lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.startWidth = 0.01f; // Set the starting width of the line
+        lineRenderer.endWidth = 0.01f;   // Set the ending width of the line
     }
 }

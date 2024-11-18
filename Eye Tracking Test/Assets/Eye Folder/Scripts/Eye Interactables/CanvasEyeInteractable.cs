@@ -4,11 +4,7 @@ using System;
 using UnityEngine;
 using TMPro;
 
-
-/// <summary>
-/// Changes the material of the interactable depending on its interaction state
-/// </summary>
-public class CanvasEyeInteractable : BaseEyeInteractable
+public class CanvasEyeInteractable : MonoBehaviour, EyeRayInterface
 {
     [SerializeField] TextMeshProUGUI bodyText;
 
@@ -22,19 +18,19 @@ public class CanvasEyeInteractable : BaseEyeInteractable
     // Dictionary of <timeOfInteraction, totalInteractionTime (miliseconds)>
     private Dictionary<DateTime, Double> allInteractions = new Dictionary<DateTime, double>();
 
-    public override void isHit(RaycastHit hitInfo)
+    public void isHit(RaycastHit hitInfo)
     {
         start = DateTime.Now;
         updateTotalTime();
     }
 
-    public override void isSelected(RaycastHit hitInfo)
+    public void isSelected(RaycastHit hitInfo)
     {
         // If live update is enabled then constantally update the interaction time
         if (liveUpdateEnabled) { updateTotalTime(); }
     }
 
-    public override void isUnselected()
+    public void isUnselected()
     {
         updateTotalTime();
     }
