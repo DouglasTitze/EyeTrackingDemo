@@ -405,7 +405,6 @@ GameObject:
   - component: {fileID: 123724911}
   - component: {fileID: 123724916}
   - component: {fileID: 123724917}
-  - component: {fileID: 123724922}
   - component: {fileID: 123724921}
   - component: {fileID: 123724920}
   m_Layer: 5
@@ -575,23 +574,6 @@ MonoBehaviour:
   bodyText: {fileID: 64581419}
   liveUpdateEnabled: 1
   isSectionEnabled: 0
---- !u!114 &123724922
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 123724910}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12e56d104027ca94a93f22d5bfb0b149, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  obj: {fileID: 1725378473}
-  matHit: {fileID: 2100000, guid: cd16cdcbe457c8d41945054444ae72a9, type: 2}
-  matSelected: {fileID: 2100000, guid: 835feaa1278e3804d8bedcc5e342c177, type: 2}
-  matUnselected: {fileID: 2100000, guid: 0251e6d73a7d55b4db8b9c8c9c185412, type: 2}
-  timeTillSelected: 3
 --- !u!1 &155393805
 GameObject:
   m_ObjectHideFlags: 0
