@@ -12,19 +12,24 @@ using TMPro;
     public string Text;
 }
 
-public class CanvasTextManager : MonoBehaviour
+public class CanvasManager : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI Header;
     [SerializeField] private TextMeshProUGUI Text;
     [SerializeField] private Button btn_back;
     [SerializeField] private Button btn_next;
+
+    // Special events triggered depending on the current section
     [SerializeField] private GameObject cubes;
-    [SerializeField] private CanvasEyeInteractable eyeInteractableScript;
-    [Space]
+    [SerializeField] private CanvasEyeInteractable canvasEyeInteractableScript;
+    [SerializeField] private GameObject Btn_SaveData;
+
+    [Space] [Space] [Space]
+
     [SerializeField] private List<Sections> TextSections = new List<Sections>();
     
     [HideInInspector] public int curSection = 0;
-    private int numberOfSections;
+    [HideInInspector] private int numberOfSections;
     private void Start()
     {
         numberOfSections = TextSections.Count;
@@ -40,6 +45,9 @@ public class CanvasTextManager : MonoBehaviour
             Header.text = TextSections[curSection].Header;
             Text.text = TextSections[curSection].Text;
 
+            /* There MUST be a way to make the code below more efficient */
+            /* I tried a switch case, but it became far too complex */
+
             // Update buttons to avoid going out of bounds
             updateButtons();
 
@@ -48,6 +56,9 @@ public class CanvasTextManager : MonoBehaviour
 
             // Check if the canvas section is being displayed
             toggleCanvasTimerSection();
+
+            // Check if the save data section is being displayed
+            toggleSaveDataButton();
         }
     }
 
@@ -72,20 +83,20 @@ public class CanvasTextManager : MonoBehaviour
 
     private void toggleCubes()
     {
-        if (curSection == 2)
-        {
-            cubes.SetActive(true);
-        }
-        else
-        {
-            cubes.SetActive(false);
-        }
+        if (curSection == 2) { cubes.SetActive(true); }
+        else { cubes.SetActive(false); }
     }
 
     private void toggleCanvasTimerSection()
     {
-        if (curSection == 3) { eyeInteractableScript.isSectionEnabled = true; }
-        else { eyeInteractableScript.isSectionEnabled = false; }
+        if (curSection == 3) { canvasEyeInteractableScript.isSectionEnabled = true; }
+        else { canvasEyeInteractableScript.isSectionEnabled = false; }
         
+    }
+
+    private void toggleSaveDataButton()
+    {
+        if (curSection == 4) { Btn_SaveData.SetActive(true); }
+        else { Btn_SaveData.SetActive(false); }
     }
 }

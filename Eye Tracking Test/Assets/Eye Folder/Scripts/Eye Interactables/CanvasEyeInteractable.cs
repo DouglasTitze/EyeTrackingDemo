@@ -16,7 +16,7 @@ public class CanvasEyeInteractable : MonoBehaviour, EyeRayInterface
     private DateTime start;
 
     // Dictionary of <timeOfInteraction, totalInteractionTime (miliseconds)>
-    private Dictionary<DateTime, Double> allInteractions = new Dictionary<DateTime, double>();
+    public Dictionary<DateTime, Double> allInteractions = new Dictionary<DateTime, double>();
 
     public void isHit(RaycastHit hitInfo)
     {

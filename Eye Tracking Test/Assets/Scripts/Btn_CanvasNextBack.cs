@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CanvasButton : MonoBehaviour
+public class Btn_CanvasNextBack : MonoBehaviour
 {
     [SerializeField] bool isBackBtn = false;
 
-    [SerializeField] private CanvasTextManager manager;
+    [SerializeField] private CanvasManager manager;
 
      public void click()
     {
