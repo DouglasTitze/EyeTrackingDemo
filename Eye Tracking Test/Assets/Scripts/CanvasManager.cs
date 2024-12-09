@@ -22,7 +22,7 @@ public class CanvasManager : MonoBehaviour
     // Special events triggered depending on the current section
     [SerializeField] private GameObject cubes;
     [SerializeField] private CanvasEyeInteractable canvasEyeInteractableScript;
-    [SerializeField] private GameObject Btn_SaveData;
+    [SerializeField] private GameObject participantIDButtons;
 
     [Space] [Space] [Space]
 
@@ -96,7 +96,7 @@ public class CanvasManager : MonoBehaviour
 
     private void toggleSaveDataButton()
     {
-        if (curSection == 4) { Btn_SaveData.SetActive(true); }
-        else { Btn_SaveData.SetActive(false); }
+        if (curSection == 4) { participantIDButtons.SetActive(true); }
+        else { participantIDButtons.SetActive(false); }
     }
 }

@@ -11,38 +11,42 @@ using System.IO;
 public class DataManager : MonoBehaviour
 {
     // Path variables
-    private string outputFileName = "canvasData.csv";
+    private string outputFileName;
     [HideInInspector] public string path;
     [HideInInspector] public HashSet<string> csvData;
-    [HideInInspector] public string participantID = "Douglas";
+    [HideInInspector] public string participantID;
 
     // CSV headers
-    private string[] headers = new string[] { "Date", "Participant ID", "Canvas ID", "Start Time of Interaction", "Interaction Duration" };
+    private string[] headers = new string[] { "Canvas ID", "Start Time of Interaction", "Interaction Duration" };
 
-    // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
-        // Create path and check if the CSV file already exists
-        path = Path.Combine(Application.persistentDataPath, outputFileName);
-        if (File.Exists(path) == false)
-        {
-            createCSVFile();
-        }
-
-        csvData = new HashSet<string>();
-        csvToSet();
+        csvData = new HashSet<string> { };
+        participantID = "";
     }
 
     /// <summary>
     /// Creates a csv file with the `outputFileName`
     /// This data is stored at:
-    /// PC Path: C:/Users/[USER]/AppData/LocalLow/UsfCAMLS/Eye Tracking v1_0\canvasData.csv
-    /// Headset Path: This PC\Quest Pro\Internal shared storage\Android\data\com.UsfCAMLS.EyeTrackingDemo.v1\files\canvasData.csv
+    /// PC Path: C:/Users/[USER]/AppData/LocalLow/UsfCAMLS/Eye Tracking v1_0\[ParticipantID]-[MM_dd_yyyy]-canvasData.csv
+    /// Headset Path: This PC\Quest Pro\Internal shared storage\Android\data\com.UsfCAMLS.EyeTrackingDemo.v1\files\[ParticipantID]-[MM_dd_yyyy]-canvasData.csv
     /// </summary>
-    private void createCSVFile()
+    public void createCSVFile()
     {
-        string headers = headerArrayToString();
-        File.AppendAllText(path, headers);
+        // Create path and check if the CSV file already exists
+        if (participantID != "")
+        {
+            string date = DateTime.Now.ToString("MM_dd_yyyy");
+            outputFileName = participantID + "-" + date + "-" + "canvasData.csv";
+            path = Path.Combine(Application.persistentDataPath, outputFileName);
+            if (File.Exists(path) == false)
+            {
+                string headers = headerArrayToString();
+                File.AppendAllText(path, headers);
+            }
+        }
+
     }
 
     /// <summary>
@@ -62,18 +66,5 @@ public class DataManager : MonoBehaviour
 
         outputString += headers[headers.Length - 1] + "\n";
         return outputString;
-    }
-
-    /// <summary>
-    /// Extracts all csv data and stores it in a CSV
-    /// This is used to ensure no duplicates are added to the CSV file
-    /// </summary>
-    private void csvToSet()
-    {
-        foreach (string line in File.ReadAllLines(path))
-        {
-            // Remove the newline character from the end of each line
-            csvData.Add(line.Trim());
-        }
     }
 }

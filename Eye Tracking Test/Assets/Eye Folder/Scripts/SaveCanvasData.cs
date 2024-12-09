@@ -14,23 +14,21 @@ public class SaveCanvasData : MonoBehaviour
     [HideInInspector] public string path;
     private string participantID;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        // Assign path
-        path = dataManager.path;
-
-        // Assign participantID;
-        // In a real scenario this !!WILL!! need to happen elsewere, becuase the participant ID will not be filled in at the start of the scenario.
-        participantID = dataManager.participantID;
-    }
-
     /// <summary>
     /// Writes all data to the CSV file at path
     /// This method is executed by a button in the scenario
     /// </summary>
-    public void writeToCSV()
+    public bool writeToCSV()
     {
+        // If it is already created, then this will do nothing
+        dataManager.createCSVFile();
+
+        participantID = dataManager.participantID;
+
+        if (participantID == "") { return false; }
+
+        path = dataManager.path;
+
         HashSet<string> csvData = dataManager.csvData;
 
         List<string> rowsToAdd = new List<string> { };
@@ -40,23 +38,27 @@ public class SaveCanvasData : MonoBehaviour
 
         foreach (var (interactionStartTime, interactionDuration) in canvas.allInteractions)
         {
-            // These MUST be in the same order as the headers
-            string row = date + ",";
-            row += participantID + ",";
-            row += canvasIdentifier + ",";
-            row += interactionStartTime.ToString("HH:mm:ss:fff") + ",";
-            row += floatToTimeString(interactionDuration);
+            // If the interaction is less than .4s, then it is most likely invalid
+            if (interactionDuration >= 400)
+            {
+                // These MUST be in the same order as the headers
+                string row = canvasIdentifier + ",";
+                row += interactionStartTime.ToString("HH:mm:ss:fff") + ",";
+                row += floatToTimeString(interactionDuration);
 
 
-            // If the row is a duplicate in the CSV, then skip adding it to the list
-            if (csvData.Contains(row)) { continue; }
+                // If the row is a duplicate in the CSV, then skip adding it to the list
+                if (csvData.Contains(row)) { continue; }
 
-            rowsToAdd.Add(row);
-            csvData.Add(row);
+                rowsToAdd.Add(row);
+                csvData.Add(row);
+            }
         }
 
         // This method does what it says, but also adds a newline to the end of each string in the list
         File.AppendAllLines(path, rowsToAdd);
+
+        return true;
     }
 
     /// <summary>
